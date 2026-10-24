@@ -4,6 +4,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" />
     <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+    <script src="products.js"></script>
 </head>
 <body>
     <div id ="app">
@@ -18,22 +19,40 @@
 
         <main>
             <div v-if="showProduct">
+                <div v-for="product in sortedProducts" :key="product.id">
                 <figure>
                     <!--bind src to attr to product.image in data-->
                     <img v-bind:src="product.image">
                 </figure>
                 <h2 v-text="product.title"></h2>
-                <p v-text="product.location"></p>
+                <p v-text="product.description"></p>
+                <p>Location: {{ product.location }}</p>
                 <!--curly bracket same as v text, even @-->
-                <p>Price: {{product.price}}</p>
+                <p>Price: €{{ product.price }}</p>
                 <p>Available Inventory: {{product.availableInventory}}</p>
 
-                <button v-on:click="addToCart" v-if="canAddToCart">
+                <button v-on:click="addToCart(product)" v-if="canAddToCart(product)">
                     Add to cart
                 </button>
                 <button disabled="disabled" v-else>
                     Add to cart
                 </button>
+
+                <span v-if="product.availableInventory === cartCount(product.id)">All out!</span>
+                <span v-else-if="product.availableInventory - cartCount(product.id) < 5">
+                    Only {{product.availableInventory - cartCount(product.id)}} left!
+                </span>
+                <span v-else>Buy now!</span>
+
+                <div>
+                    <span v-for="n in product.rating" :key="'filled-' + n">
+                        <i class="fa-solid fa-star"></i>
+                    </span>
+                    <span v-for="n in (5 - product.rating)" :key="'empty-' + n">
+                        <i class="fa-regular fa-star"></i>
+                    </span>
+                </div>
+            </div>
             </div>
             <div v-else>
                 <h2>Checkout</h2>
@@ -48,10 +67,12 @@
                     <input v-model.trim="order.lastName"/>
                 </p>
                 <p>
-                    <strong>Address:</strong> <input v-model="order.address"/>
+                    <strong>Address:</strong> 
+                    <input v-model="order.address"/>
                 </p>
                 <p>
-                    <strong>City:</strong> <input v-model="order.city"/>
+                    <strong>City:</strong> 
+                    <input v-model="order.city"/>
                 </p>
                 <p>
                     <strong>State:</strong>
@@ -64,7 +85,8 @@
                     </select>
                 </p>
                 <p>
-                    <strong>Zip Code:</strong> <input v-model.number="order.zip" type="number"/>
+                    <strong>Zip Code:</strong> 
+                    <input v-model.number="order.zip" type="number"/>
                 </p>
                 <p>
                     <input type="checkbox" id="gift" value="true" v-model="order.gift" 
@@ -102,7 +124,9 @@
             data: {// the data option
                 //the key sitname matches the value of v text
                 sitename: 'COREs After School Class App',
+                products: products,
                 showProduct: true,
+                cart:[], //array to store the items
                 states:{
                     AL:'Alabama',
                     AR:'Arizona',
@@ -119,22 +143,27 @@
                     method: 'Home',
                     sendGift: 'Send as a gift',
                     dontSendGift: 'Do not send gift'
-                },
-                product: {
-                    id: 1001,
-                    title: "Subject: Math",
-                    location: 'Naples',
-                    price: 30,
-                    image:"images/1b.png",
-                    availableInventory: 5
-                },
-                cart:[] //array to store the items
+                }
                 },
             methods:{
-                addToCart: function(){
-                    this.cart.push(this.product.id); //this as in the current item
-                    this.product.availableInventory--;
+                addToCart: function(product){
+                    if (this.canAddToCart(product)) {
+                            this.cart.push(product.id);
+                        }
                 },
+                canAddToCart: function(product) {
+                        return product.availableInventory > this.cartCount(product.id);
+                },
+                cartCount(id) {
+                        let count = 0;
+                        for (let i = 0; i < this.cart.length; i++) {
+                            if (this.cart[i] === id) {
+                                count++;
+                            }
+                        }
+                        return count;
+                },
+
                 showCheckout() {
                     this.showProduct = this.showProduct ? false:true;
                 },
@@ -147,9 +176,14 @@
                 cartItemCount() {
                     return this.cart.length;
                 },
-                canAddToCart(){
-                    return this.product.availableInventory > 0;
-                },
+                sortedProducts: function() {
+                        function compare(a, b) {
+                            if (a.price < b.price) return -1;
+                            if (a.price > b.price) return 1;
+                            return 0;
+                        }
+                        return this.products.slice().sort(compare);
+                }
         
             }
         });
