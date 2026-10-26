@@ -1,9 +1,9 @@
 <html>
 <head>
     <title>After School Class App</title>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" />
     <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+    <link rel="stylesheet" href="style.css">
     <script src="products.js"></script>
 </head>
 <body>
@@ -12,39 +12,29 @@
             <h1 v-text="sitename"></h1>
 
             <button v-on:click="showCheckout">
-                cart: {{cartItemCount}}
-                <span class="fas fa-cart-plus"></span>Checkout
+                {{cartItemCount}}
+                <span class="fas fa-cart-plus"></span>
+                Checkout
             </button>
         </header>
 
         <main>
-            <div v-if="showProduct">
-                <div v-for="product in sortedProducts" :key="product.id">
+            <div v-if="showProduct" class="course-list">
+                <div class="course-card" v-for="product in sortedProducts" :key="product.id">
+                <div class="info">
+                    <h2 v-text="product.title"></h2>
+                    <p v-text="product.description"></p>
+                    <p>Location: {{ product.location }}</p>
+                    <!--curly bracket same as v text, even @-->
+                    <p>Price: €{{ product.price }}</p>
+                    <p>Available Inventory: {{product.availableInventory}}</p>
+                </div>
                 <figure>
                     <!--bind src to attr to product.image in data-->
-                    <img v-bind:src="product.image">
+                    <img v-bind:src="product.image" v-bind:alt="product.title">
                 </figure>
-                <h2 v-text="product.title"></h2>
-                <p v-text="product.description"></p>
-                <p>Location: {{ product.location }}</p>
-                <!--curly bracket same as v text, even @-->
-                <p>Price: €{{ product.price }}</p>
-                <p>Available Inventory: {{product.availableInventory}}</p>
 
-                <button v-on:click="addToCart(product)" v-if="canAddToCart(product)">
-                    Add to cart
-                </button>
-                <button disabled="disabled" v-else>
-                    Add to cart
-                </button>
-
-                <span v-if="product.availableInventory === cartCount(product.id)">All out!</span>
-                <span v-else-if="product.availableInventory - cartCount(product.id) < 5">
-                    Only {{product.availableInventory - cartCount(product.id)}} left!
-                </span>
-                <span v-else>Buy now!</span>
-
-                <div>
+                <div class="stars">
                     <span v-for="n in product.rating" :key="'filled-' + n">
                         <i class="fa-solid fa-star"></i>
                     </span>
@@ -52,10 +42,25 @@
                         <i class="fa-regular fa-star"></i>
                     </span>
                 </div>
+
+                <button v-on:click="addToCart(product)" v-if="canAddToCart(product)">
+                    Add to cart
+                </button>
+                <button disabled="disabled" v-else>
+                    Out of Stock!
+                </button>
+
+                <!-- <span v-if="product.availableInventory === cartCount(product.id)">All out!</span>
+                <span v-else-if="product.availableInventory - cartCount(product.id) < 5">
+                    Only {{product.availableInventory - cartCount(product.id)}} left!
+                </span>
+                <span v-else>Buy now!</span> -->
+
+                
             </div>
             </div>
-            <div v-else>
-                <h2>Checkout</h2>
+            <div v-else class="checkout">
+                <h2>Checkout Page</h2>
                 <p>
                     <strong>First Name: </strong>
                     <!-- this input field is bound to firstname in the order object-->
@@ -89,15 +94,18 @@
                     <input v-model.number="order.zip" type="number"/>
                 </p>
                 <p>
-                    <input type="checkbox" id="gift" value="true" v-model="order.gift" 
+                    <input type="checkbox" id="gift" value="true" 
+                    v-model="order.gift" 
                     v-bind:true-value="order.sendGift"
                     v-bind:false-value="order.dontSendGift"/>
                     <label for="gift">Ship as gift?</label>
                 </p>
                 <p>
-                    <input type="radio" id="home" value="Home" v-model="order.method"/>
+                    <input type="radio" id="home" value="Home" 
+                    v-model="order.method"/>
                     <label for="home">Home</label>
-                    <input type="radio" id="business" value="Business" v-model="order.method"/>
+                    <input type="radio" id="business" value="Business" 
+                    v-model="order.method"/>
                     <label for="business">Business</label>
                 </p>
 
@@ -164,11 +172,11 @@
                         return count;
                 },
 
-                showCheckout() {
+                showCheckout: function() {
                     this.showProduct = this.showProduct ? false:true;
                 },
                 submitForm() {
-                    {alert('Order Submitted')}
+                    alert('Order Submitted')
                 }
             },
             computed:{
@@ -176,15 +184,39 @@
                 cartItemCount() {
                     return this.cart.length;
                 },
-                sortedProducts: function() {
+                sortedPriceProducts: function() {
                         function compare(a, b) {
                             if (a.price < b.price) return -1;
                             if (a.price > b.price) return 1;
                             return 0;
                         }
                         return this.products.slice().sort(compare);
+                },
+                sortedSubjectProducts: function() {
+                    function compare(a, b) {
+                        if (a.title < b.title) return -1;
+                        if (a.title > b.title) return 1;
+                        return 0;
+                    }
+                    return this.products.slice().sort(compare);
+                },
+                sortedLocationProducts: function() {
+                    function compare(a, b) {
+                        if (a.location < b.location) return -1;
+                        if (a.location > b.location) return 1;
+                        return 0;
+                    }
+                    return this.products.slice().sort(compare);
+                },
+                sortedSpacesProducts: function() {
+                    function compare(a, b) {
+                        if (a.availableInventory < b.availableInventory) return -1;
+                        if (a.availableInventory > b.availableInventory) return 1;
+                        return 0;
+                    }
+                    return this.products.slice().sort(compare);
                 }
-        
+
             }
         });
     </script>
