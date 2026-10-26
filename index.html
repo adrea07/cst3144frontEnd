@@ -19,12 +19,37 @@
         </header>
 
         <main>
-            <div v-if="showProduct" class="course-list">
+            <div v-if="showProduct" class="catalog-layout">
+                <aside class="sort-sidebar">
+                    <p>Sort by</p>
+                    <label>
+                        <input type="radio" value="Subject" v-model="order.sortBy">
+                            Subject
+                    </label>
+                    <label>
+                        <input type="radio" value="Location" v-model="order.sortBy">
+                            Location
+                    </label>
+                    <label>
+                        <input type="radio" value="Lecturer" v-model="order.sortBy">
+                            Lecturer
+                    </label>
+                    <label>
+                        <input type="radio" value="Price" v-model="order.sortBy">
+                            Price
+                    </label>
+                    <label>
+                        <input type="radio" value="Availability" v-model="order.sortBy">
+                            Availability
+                    </label>
+                </aside>
+            <div class="course-list">
                 <div class="course-card" v-for="product in sortedProducts" :key="product.id">
                 <div class="info">
                     <h2 v-text="product.title"></h2>
                     <p v-text="product.description"></p>
                     <p>Location: {{ product.location }}</p>
+                    <p>Lecturer: {{ product.lecturer }}</p>
                     <!--curly bracket same as v text, even @-->
                     <p>Price: €{{ product.price }}</p>
                     <p>Available Inventory: {{product.availableInventory}}</p>
@@ -184,38 +209,42 @@
                 cartItemCount() {
                     return this.cart.length;
                 },
-                sortedPriceProducts: function() {
-                        function compare(a, b) {
-                            if (a.price < b.price) return -1;
-                            if (a.price > b.price) return 1;
-                            return 0;
-                        }
-                        return this.products.slice().sort(compare);
-                },
-                sortedSubjectProducts: function() {
-                    function compare(a, b) {
-                        if (a.title < b.title) return -1;
-                        if (a.title > b.title) return 1;
-                        return 0;
+                sortedProducts() {
+                    let products = this.products.slice();
+
+                    if (this.order.sortBy === "Subject") {
+                        return products.sort((a, b) =>
+                            a.title.localeCompare(b.title)
+                        );
                     }
-                    return this.products.slice().sort(compare);
-                },
-                sortedLocationProducts: function() {
-                    function compare(a, b) {
-                        if (a.location < b.location) return -1;
-                        if (a.location > b.location) return 1;
-                        return 0;
+
+                    if (this.order.sortBy === "Location") {
+                        return products.sort((a, b) =>
+                            a.location.localeCompare(b.location)
+                        );
                     }
-                    return this.products.slice().sort(compare);
-                },
-                sortedSpacesProducts: function() {
-                    function compare(a, b) {
-                        if (a.availableInventory < b.availableInventory) return -1;
-                        if (a.availableInventory > b.availableInventory) return 1;
-                        return 0;
+
+                    if (this.order.sortBy === "Lecturer") {
+                        return products.sort((a, b) =>
+                            a.lecturer.replace("Mr ", "").replace("Ms ", "").localeCompare(b.lecturer.replace("Mr ", "").replace("Ms ", ""))
+                        );
                     }
-                    return this.products.slice().sort(compare);
-                }
+
+                    if (this.order.sortBy === "Price") {
+                        return products.sort((a, b) =>
+                            a.price - b.price
+                        );
+                    }
+
+                    if (this.order.sortBy === "Availability") {
+                        return products.sort((a, b) =>
+                            a.availableInventory - b.availableInventory
+                        );
+                    }
+
+                    // No sorting selected: preserve original order
+                    return products;
+                },
 
             }
         });
