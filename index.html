@@ -19,6 +19,9 @@
         </header>
 
         <main>
+            <p v-if="showProduct && cartError" class="cart-message" role="alert">
+                Your cart is empty! Add a class to your cart before checking out.
+            </p>
             <div v-if="showProduct" class="catalog-layout">
                 <aside class="sort-sidebar">
                     <p>Sort by</p>
@@ -180,6 +183,7 @@
                 sitename: 'COREs After School Class App',
                 products: products,
                 showProduct: true,
+                cartError: false,
                 searchText: '',
                 cart:[], //array to store the items
                 states:{
@@ -220,7 +224,18 @@
                 },
 
                 showCheckout: function() {
-                    this.showProduct = this.showProduct ? false:true;
+                    if (this.showProduct) {
+                        // going to checkout: only allowed with something in the cart
+                        if (this.cart.length === 0) {
+                            this.cartError = true;
+                            return;
+                            }
+                        this.cartError = false;
+                        this.showProduct = false;
+                        } else {
+                        // going back to the classes
+                        this.showProduct = true;
+                            }
                 },
                 submitForm() {
                     alert('Order Submitted')
@@ -248,7 +263,7 @@
                         // every word typed must appear somewhere in the card's text
                         return terms.every(term => text.includes(term));
                     });
-                    
+
                     if (this.order.sortBy === "Subject") {
                             products.sort((a, b) => a.title.localeCompare(b.title));
                     }
