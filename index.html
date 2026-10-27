@@ -53,6 +53,17 @@
                         Descending
                     </label>
                 </aside>
+            <div class="catalog-main">
+                <input
+                    type="search"
+                    class="search-bar"
+                    v-model.trim="searchText"
+                    placeholder="Search by subject, location, price or spaces..."
+                    aria-label="Search classes">
+
+                <p v-if="sortedProducts.length === 0" class="no-results">
+                    No classes match your search. </p>
+
             <div class="course-list">
                 <div class="course-card" v-for="product in sortedProducts" :key="product.id">
                 <div class="info">
@@ -91,7 +102,7 @@
                 </span>
                 <span v-else>Buy now!</span> -->
 
-                
+                </div>
             </div>
             </div>
             <div v-else class="checkout">
@@ -169,6 +180,7 @@
                 sitename: 'COREs After School Class App',
                 products: products,
                 showProduct: true,
+                searchText: '',
                 cart:[], //array to store the items
                 states:{
                     AL:'Alabama',
@@ -220,8 +232,23 @@
                     return this.cart.length;
                 },
                 sortedProducts() {
-                    let products = this.products.slice();
+                    const terms = this.searchText.toLowerCase().split(/\s+/).filter(Boolean);
 
+                    let products = this.products.filter(product => {
+                        // description is deliberately left out
+                        const text = [
+                            product.title,
+                            product.location,
+                            product.lecturer,
+                            product.price,
+                            '€' + product.price,
+                            product.availableInventory - this.cartCount(product.id)
+                        ].join(' ').toLowerCase();
+
+                        // every word typed must appear somewhere in the card's text
+                        return terms.every(term => text.includes(term));
+                    });
+                    
                     if (this.order.sortBy === "Subject") {
                             products.sort((a, b) => a.title.localeCompare(b.title));
                     }
