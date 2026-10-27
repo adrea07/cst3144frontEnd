@@ -1,4 +1,8 @@
 <html>
+    <!-- done till try7.html BUT 
+    the checkout page isint displaying anything
+    also the availableInventory doesnt update 
+    when added to cart, check that out -->
 <head>
     <title>After School Class App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" />
@@ -10,7 +14,6 @@
     <div id ="app">
         <header>
             <h1 v-text="sitename"></h1>
-
             <button v-on:click="showCheckout">
                 {{cartItemCount}}
                 <span class="fas fa-cart-plus"></span>
@@ -56,6 +59,7 @@
                         Descending
                     </label>
                 </aside>
+
             <div class="catalog-main">
                 <input
                     type="search"
@@ -76,7 +80,7 @@
                     <p>Lecturer: {{ product.lecturer }}</p>
                     <!--curly bracket same as v text, even @-->
                     <p>Price: €{{ product.price }}</p>
-                    <p>Available Inventory: {{product.availableInventory}}</p>
+                    <p>Spaces: {{ product.availableInventory - cartCount(product.id) }}</p>
                 </div>
                 <figure>
                     <!--bind src to attr to product.image in data-->
@@ -99,16 +103,34 @@
                     Out of Stock!
                 </button>
 
-                <!-- <span v-if="product.availableInventory === cartCount(product.id)">All out!</span>
-                <span v-else-if="product.availableInventory - cartCount(product.id) < 5">
-                    Only {{product.availableInventory - cartCount(product.id)}} left!
-                </span>
-                <span v-else>Buy now!</span> -->
-
                 </div>
             </div>
             </div>
             <div v-else class="checkout">
+                <section class="checkout-cart">
+
+                    <h2>Your Cart</h2>
+                    <div class="cart-list">
+                    <div class="cart-item" v-for="item in cartProducts" :key="item.id">
+                            <div class="cart-item-head">
+                            <div class="info">
+                                <h3 v-text="item.title"></h3>
+                                <p>Location: {{ item.location }}</p>
+                                <p>Price: €{{ item.price.toFixed(2) }}</p>
+                                <p>Quantity: {{ item.qty }}</p>
+                            </div>
+
+                            <figure>
+                                <img :src="item.image" :alt="item.title">
+                            </figure>
+                    </div>
+                    <p class="subtotal">
+                        Subtotal: €{{ item.subtotal.toFixed(2) }}
+                    </p>
+                    </div>
+                    </div>
+                    <p class="cart-total">Total: €{{ cartTotal.toFixed(2) }}</p>
+                </section>
                 <h2>Checkout Page</h2>
                 <p>
                     <strong>First Name: </strong>
@@ -201,14 +223,17 @@
                     zip: '',
                     method: 'Home',
                     sendGift: 'Send as a gift',
-                    dontSendGift: 'Do not send gift'
+                    dontSendGift: 'Do not send gift',
+                    gift: 'Do not send gift'
                 }
                 },
             methods:{
                 addToCart: function(product){
                     if (this.canAddToCart(product)) {
-                            this.cart.push(product.id);
-                        }
+                        this.cart.push(product.id);
+                        this.cartError = false;
+                    }
+
                 },
                 canAddToCart: function(product) {
                         return product.availableInventory > this.cartCount(product.id);
@@ -279,7 +304,10 @@
                         products.sort((a, b) => a.price - b.price);
                     }
                     else if (this.order.sortBy === "Availability") {
-                        products.sort((a, b) => a.availableInventory - b.availableInventory);
+                         products.sort((a, b) =>
+                            (a.availableInventory - this.cartCount(a.id)) -
+                            (b.availableInventory - this.cartCount(b.id))
+                        );
                     }
                     else {
                         // No sorting selected: preserve original order
@@ -293,6 +321,18 @@
 
                     return products;
                 },
+                 cartProducts() {
+                    return this.products
+                        .filter(product => this.cartCount(product.id) > 0)
+                        .map(product => ({
+                            ...product,
+                            qty: this.cartCount(product.id),
+                            subtotal: product.price * this.cartCount(product.id)
+                        }));
+                    },
+                    cartTotal() {
+                        return this.cartProducts.reduce((sum, item) => sum + item.subtotal, 0);
+                    },
 
             }
         });
