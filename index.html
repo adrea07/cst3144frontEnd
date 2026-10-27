@@ -42,6 +42,16 @@
                         <input type="radio" value="Availability" v-model="order.sortBy">
                             Availability
                     </label>
+
+                    <p>Sort order</p>
+                    <label>
+                        <input type="radio" name="sortOrder" value="asc" v-model="order.sortOrder">
+                        Ascending
+                    </label>
+                    <label>
+                        <input type="radio" name="sortOrder" value="desc" v-model="order.sortOrder">
+                        Descending
+                    </label>
                 </aside>
             <div class="course-list">
                 <div class="course-card" v-for="product in sortedProducts" :key="product.id">
@@ -213,36 +223,32 @@
                     let products = this.products.slice();
 
                     if (this.order.sortBy === "Subject") {
-                        return products.sort((a, b) =>
-                            a.title.localeCompare(b.title)
-                        );
+                            products.sort((a, b) => a.title.localeCompare(b.title));
                     }
-
-                    if (this.order.sortBy === "Location") {
-                        return products.sort((a, b) =>
-                            a.location.localeCompare(b.location)
-                        );
+                    else if (this.order.sortBy === "Location") {
+                        products.sort((a, b) => a.location.localeCompare(b.location));
                     }
-
-                    if (this.order.sortBy === "Lecturer") {
-                        return products.sort((a, b) =>
+                    else if (this.order.sortBy === "Lecturer") {
+                        products.sort((a, b) =>
                             a.lecturer.replace("Mr ", "").replace("Ms ", "").localeCompare(b.lecturer.replace("Mr ", "").replace("Ms ", ""))
                         );
                     }
-
-                    if (this.order.sortBy === "Price") {
-                        return products.sort((a, b) =>
-                            a.price - b.price
-                        );
+                    else if (this.order.sortBy === "Price") {
+                        products.sort((a, b) => a.price - b.price);
+                    }
+                    else if (this.order.sortBy === "Availability") {
+                        products.sort((a, b) => a.availableInventory - b.availableInventory);
+                    }
+                    else {
+                        // No sorting selected: preserve original order
+                        return products;
                     }
 
-                    if (this.order.sortBy === "Availability") {
-                        return products.sort((a, b) =>
-                            a.availableInventory - b.availableInventory
-                        );
+                    // Ascending is done above, so flip it for descending
+                    if (this.order.sortOrder === "desc") {
+                        products.reverse();
                     }
 
-                    // No sorting selected: preserve original order
                     return products;
                 },
 
