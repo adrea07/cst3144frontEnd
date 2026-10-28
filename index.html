@@ -23,8 +23,8 @@
                     </span>
 
                     <span v-else>
+                        Back to Home
                         <span class="fas fa-home"></span>
-                        Home
                     </span>
                 </button>
             </header>
@@ -33,7 +33,7 @@
                 <p v-if="showProduct && cartError" class="cart-message" role="alert">
                     Your cart is empty! Add a class to your cart before checking out.
                 </p>
-                <div v-if="showProduct" class="catalog-layout">
+                 <div v-if="showProduct" class="catalog-layout">
                     <aside class="sort-sidebar">
                         <p>Sort by</p>
                         <label>
@@ -158,7 +158,7 @@
                 </section>
 
                 <section class="checkout-form">
-                    Checkout Page
+                    <h2>Checkout Page</h2>
                     <p>
                         <strong>First Name:</strong>
                         <input v-model.trim="order.firstName"/>
@@ -190,18 +190,20 @@
                         <input v-model.number="order.zip" type="number"/>
                     </p>
                     <p>
-                        <input type="checkbox" id="gift"
-                        v-model="order.gift"
-                        v-bind:true-value="order.sendGift"
-                        v-bind:false-value="order.dontSendGift"/>
-                        <label for="gift">Send as Gift</label>
+                        <input type="checkbox" id="trialClass"
+                            v-model="order.trialClass"
+                            v-bind:true-value="order.keepClass"
+                            v-bind:false-value="order.dontKeepClass"/>
+                        <label for="trialClass">Request for a trial class</label>
                     </p>
 
-                        <input type="radio" id="home" value="Home" v-model="order.method">
-                        <label for="home">Home </label>
+                        <input type="radio" id="online" value="online" v-model="order.method"
+                        :disabled="order.trialClass !== order.keepClass">
+                        <label for="online">Online </label>
 
-                        <input type="radio" id="business" value="Business" v-model="order.method">
-                        <label for="business">Business </label>
+                        <input type="radio" id="in-person" value="in-person" v-model="order.method"
+                        :disabled="order.trialClass !== order.keepClass">
+                        <label for="in-person">In-person </label>
 
                     <h2>Order Information</h2>
                     <p>First Name:{{order.firstName}}</p>
@@ -210,9 +212,14 @@
                     <p>City:{{order.city}}</p>
                     <p>State:{{order.state}}</p>
                     <p>Zip:{{order.zip}}</p>
-                    <p>Method:{{order.method}}</p>
+                    <p>Trial Class Method:{{order.method}}</p>
 
-                    <button v-on:click="submitForm">Place Order</button>
+                    <button v-on:click="submitForm" :disabled="false">
+                        Place Order
+                    </button>
+                    <p v-if="showValidationMessage && !isOrderValid" class="validation-message" role="alert">
+                        Must fill all fields before placing order.
+                    </p>
                 </section>
                 </div>
             </main>
@@ -226,6 +233,7 @@
                     showProduct: true,
                     cart: [],
                     cartError: false,
+                    showValidationMessage: false,
                     searchText: '',
                     order: {
                         firstName: '',
@@ -237,9 +245,9 @@
                         method: '',
                         sortBy: '',
                         sortOrder: 'asc',
-                        gift: 'Do not send as Gift',
-                        sendGift: 'Send as Gift',
-                        dontSendGift: 'Do not send as Gift' 
+                        trialClass: 'Do not request a trial class',
+                        keepClass: 'Request a trial class',
+                        dontKeepClass: 'Do not request a trial class' 
                     },
                     states: {
                         AL: 'Alabama',
@@ -292,6 +300,12 @@
                         }
                     },
                     submitForm: function() {
+                         if (!this.isOrderValid) {
+                            this.showValidationMessage = true;
+                            return;
+                        }
+
+                        this.showValidationMessage = false;
                         alert('Order Submitted!');
                     }
                 },
@@ -347,17 +361,27 @@
                         return products;
                     },
                     cartProducts() {
-                    return this.products
-                        .filter(product => this.cartCount(product.id) > 0)
-                        .map(product => ({
-                            ...product,
-                            qty: this.cartCount(product.id),
-                            subtotal: product.price * this.cartCount(product.id)
-                        }));
+                        return this.products
+                            .filter(product => this.cartCount(product.id) > 0)
+                            .map(product => ({
+                                ...product,
+                                qty: this.cartCount(product.id),
+                                subtotal: product.price * this.cartCount(product.id)
+                            }));
                     },
                     cartTotal() {
                         return this.cartProducts.reduce((sum, item) => sum + item.subtotal, 0);
                     },
+                    isOrderValid() {
+                        return (
+                            this.order.firstName.trim() !== '' &&
+                            this.order.lastName.trim() !== '' &&
+                            this.order.address.trim() !== '' &&
+                            this.order.city.trim() !== '' &&
+                            this.order.state !== '' &&
+                            this.order.zip !== ''
+                        );
+                    }
                 }
 
                 }

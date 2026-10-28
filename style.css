@@ -74,7 +74,7 @@ main { padding: 24px 28px; position: relative; }
   padding: 12px 14px;
   border: 2px solid var(--blue);
   border-radius: 12px;
-  background: #fffaf0;
+  background: #FFF4E0;
   font-size: 0.9rem;
   position: sticky;       /* stays in view while scrolling the cards */
   top: 16px;
@@ -187,7 +187,7 @@ main { padding: 24px 28px; position: relative; }
   padding: 10px 14px;
   border: 3px solid var(--blue);
   border-radius: 999px;
-  background: #fffaf0;
+  background: #FFF4E0;
   font-size: 1rem;
   color: var(--ink);
 }
@@ -228,7 +228,7 @@ main { padding: 24px 28px; position: relative; }
   padding: 6px 10px;
   border: 3px solid #F88DA8;
   border-radius: 8px;
-  background: #fffaf0;
+  background: #F88DA8;
   color: var(--ink);
   font-size: 0.8rem;
   line-height: 1.3;
@@ -243,7 +243,7 @@ main { padding: 24px 28px; position: relative; }
   right: 24px;
   width: 10px;
   height: 10px;
-  background: #fffaf0;
+  background: #F88DA8;
   border-top: 2px solid #F88DA8;
   border-left: 2px solid #F88DA8;
   transform: rotate(45deg);
@@ -259,7 +259,27 @@ main { padding: 24px 28px; position: relative; }
 .checkout-cart { flex: 2 1 460px; }
 .checkout-form { flex: 1 1 320px; }
 
-/* cart items as squares */
+.checkout-form button {
+    background-color: #F88DA8;
+    color: #443850;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px 20px;
+    min-width: 180px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.checkout-form button:hover {
+    opacity: 0.85;
+}
+.checkout-form .validation-message {
+    color: #d32f2f;
+    font-size: 18px;
+    font-weight: 400;
+    margin-top: 12px;
+}
 /* cart items as squares */
 .cart-list {
   display: grid;
